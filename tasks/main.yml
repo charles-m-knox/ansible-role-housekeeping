@@ -59,7 +59,7 @@
   become: true
   when:
     - ansible_pkg_mgr == 'pacman'
-    - pacman_clean_all_cached_packages is True
+    - pacman_clean_all_cached_packages is true
   tags:
     - housekeeping
 
