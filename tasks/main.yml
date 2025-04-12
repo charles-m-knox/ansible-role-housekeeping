@@ -1,0 +1,60 @@
+#SPDX-License-Identifier: MIT-0
+---
+# if you run many ansible jobs over time, this directory can get a bit polluted
+- name: clean up all lingering async jobs
+  file:
+    path: "{{ ansible_user_dir }}/.ansible_async"
+    state: absent
+  tags:
+    - housekeeping
+
+- name: clean up all systemd coredumps
+  find:
+    paths: /var/lib/systemd/coredump/
+    file_type: any
+    state: absent
+  become: true
+  when:
+    - ansible_service_mgr == 'systemd'
+  tags:
+    - housekeeping
+
+- name: clean up excess system logs
+  shell: journalctl {{ journalctl_cleanup_args }}
+  become: true
+  when:
+    - ansible_service_mgr == 'systemd'
+  tags:
+    - housekeeping
+
+- name: clean up excess user logs
+  shell: journalctl --user {{ journalctl_cleanup_args }}
+  become: false
+  when:
+    - ansible_service_mgr == 'systemd'
+  tags:
+    - housekeeping
+
+- name: clean up all cached packages and package database
+  community.general.pacman:
+    state: clean
+    clean_all: "{{ clean_all_cached_packages }}"
+  when:
+    - ansible_pkg_mgr == 'pacman'
+  tags:
+    - housekeeping
+
+- name: run user-scoped host-specific housekeeping scripts
+  shell: "{{ housekeeping_user_scope_script }}"
+  when:
+    - housekeeping_user_scope_script | length > 0
+  tags:
+    - housekeeping
+
+- name: run root-scoped host-specific housekeeping scripts
+  shell: "{{ housekeeping_root_scope_script }}"
+  become: true
+  when:
+    - housekeeping_root_scope_script | length > 0
+  tags:
+    - housekeeping

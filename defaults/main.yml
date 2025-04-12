@@ -1,0 +1,13 @@
+#SPDX-License-Identifier: MIT-0
+---
+# other values could be:
+# --vacuum-time=1s
+# --vacuum-time=2weeks
+journalctl_cleanup_args: "--vacuum-size=100M"
+
+# setting this to true will yield less disk usage, but may make rollbacks
+# difficult. Setting it to false is safer.
+clean_all_cached_packages: true
+
+housekeeping_user_scope_script: ""
+housekeeping_root_scope_script: ""
