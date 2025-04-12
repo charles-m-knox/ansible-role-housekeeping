@@ -83,8 +83,6 @@
   shell:
     cmd: >
       command -v flatpak >/dev/null 2>&1 && flatpak --user uninstall --unused --noninteractive
-  when:
-    - install_flatpak == True
   register: flatpak_user_prune
   changed_when: |
     flatpak_user_prune.stdout != 'Nothing unused to uninstall'
@@ -123,8 +121,18 @@
   changed_when: |
     podman_safe_system_root_prune.stdout != 'Total reclaimed space: 0B'
   become: true
-  when:
-    - install_flatpak == True
   tags:
     - housekeeping
     - podman-prune
+
+- name: docker safe system prune (root)
+  shell:
+    cmd: >
+      command -v docker >/dev/null 2>&1 && {{ docker_safe_system_prune_command }}
+  register: docker_safe_system_root_prune
+  changed_when: |
+    docker_safe_system_root_prune.stdout != 'Total reclaimed space: 0B'
+  become: true
+  tags:
+    - housekeeping
+    - docker-prune

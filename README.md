@@ -1,6 +1,16 @@
 # housekeeping
 
-Performs various housekeeping tasks for Linux systems, such as pruning old journalctl logs, systemd coredumps, old cached packages, ansible async job logs, etc. Also supports custom housekeeping shell scripts on a per-host basis.
+Performs various housekeeping tasks for Linux systems:
+
+- pruning old journalctl logs
+- systemd coredumps
+- old cached packages
+- ansible async job logs
+- if flatpak is installed, it removes unused flatpak layers
+- if podman is installed, it runs `podman system prune -f` (not `-af`)
+- if docker is installed, it runs `docker system prune -f` (not `-af`) as root
+
+Also supports custom housekeeping shell scripts on a per-host basis.
 
 ## Requirements
 
