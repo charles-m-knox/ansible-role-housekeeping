@@ -47,9 +47,8 @@
     - housekeeping
 
 - name: clean up all cached packages and package database
-  community.general.pacman:
-    state: clean
-    clean_all: "{{ clean_all_cached_packages }}"
+  shell: pacman -Scc
+  become: true
   when:
     - ansible_pkg_mgr == 'pacman'
   tags:
