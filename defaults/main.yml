@@ -7,3 +7,7 @@ journalctl_cleanup_args: "--vacuum-size=100M"
 
 housekeeping_user_scope_script: ""
 housekeeping_root_scope_script: ""
+
+# you may want to keep your cached pacman packages. If so, set this
+# to false.
+pacman_clean_all_cached_packages: true

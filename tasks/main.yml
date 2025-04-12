@@ -46,11 +46,20 @@
   tags:
     - housekeeping
 
-- name: clean up all cached packages and package database
-  shell: pacman -Scc
+- name: clean up all uninstalled cached packages
+  shell: pacman -Sc --noconfirm
   become: true
   when:
     - ansible_pkg_mgr == 'pacman'
+  tags:
+    - housekeeping
+
+- name: clean up ALL cached packages
+  shell: printf "y\ny\n" | pacman -Scc
+  become: true
+  when:
+    - ansible_pkg_mgr == 'pacman'
+    - pacman_clean_all_cached_packages is True
   tags:
     - housekeeping
 
