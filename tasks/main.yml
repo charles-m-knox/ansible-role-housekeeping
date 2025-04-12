@@ -55,11 +55,12 @@
     - housekeeping
 
 - name: clean up ALL cached packages
-  shell: printf "y\ny\n" | pacman -Scc
+  shell: |
+    printf "y\ny\n" | pacman -Scc
   become: true
   when:
     - ansible_pkg_mgr == 'pacman'
-    - pacman_clean_all_cached_packages is true
+    - pacman_clean_all_cached_packages == True
   tags:
     - housekeeping
 
