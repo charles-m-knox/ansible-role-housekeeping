@@ -78,3 +78,53 @@
     - housekeeping_root_scope_script | length > 0
   tags:
     - housekeeping
+
+- name: flatpak prune
+  shell:
+    cmd: >
+      command -v flatpak >/dev/null 2>&1 && flatpak --user uninstall --unused --noninteractive
+  when:
+    - install_flatpak == True
+  register: flatpak_user_prune
+  changed_when: |
+    flatpak_user_prune.stdout != 'Nothing unused to uninstall'
+  tags:
+    - housekeeping
+    - flatpak-prune
+
+- name: flatpak prune (system)
+  shell:
+    cmd: >
+      command -v flatpak >/dev/null 2>&1 && flatpak --system uninstall --unused --noninteractive
+  become: true
+  register: flatpak_root_prune
+  changed_when: |
+    flatpak_root_prune.stdout != 'Nothing unused to uninstall'
+  tags:
+    - housekeeping
+    - flatpak-prune
+
+- name: podman safe system prune
+  shell:
+    cmd: >
+      command -v podman >/dev/null 2>&1 && {{ podman_safe_system_prune_command }}
+  register: podman_safe_system_user_prune
+  changed_when: |
+    podman_safe_system_user_prune.stdout != 'Total reclaimed space: 0B'
+  tags:
+    - housekeeping
+    - podman-prune
+
+- name: podman safe system prune (root)
+  shell:
+    cmd: >
+      command -v podman >/dev/null 2>&1 && {{ podman_safe_system_prune_command }}
+  register: podman_safe_system_root_prune
+  changed_when: |
+    podman_safe_system_root_prune.stdout != 'Total reclaimed space: 0B'
+  become: true
+  when:
+    - install_flatpak == True
+  tags:
+    - housekeeping
+    - podman-prune
