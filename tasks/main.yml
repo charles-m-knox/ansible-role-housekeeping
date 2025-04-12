@@ -82,10 +82,14 @@
 - name: flatpak prune
   shell:
     cmd: >
-      command -v flatpak >/dev/null 2>&1 && flatpak --user uninstall --unused --noninteractive
+      if command -v flatpak >/dev/null 2>&1; then
+        flatpak --user uninstall --unused --noninteractive
+      else
+        echo -n '(skipping)'
+      fi
   register: flatpak_user_prune
   changed_when: |
-    flatpak_user_prune.stdout != 'Nothing unused to uninstall'
+    flatpak_user_prune.stdout != 'Nothing unused to uninstall' and flatpak_user_prune.stdout != '(skipping)'
   tags:
     - housekeeping
     - flatpak-prune
@@ -93,11 +97,15 @@
 - name: flatpak prune (system)
   shell:
     cmd: >
-      command -v flatpak >/dev/null 2>&1 && flatpak --system uninstall --unused --noninteractive
+      if command -v flatpak >/dev/null 2>&1; then
+        flatpak --system uninstall --unused --noninteractive
+      else
+        echo -n '(skipping)'
+      fi
   become: true
   register: flatpak_root_prune
   changed_when: |
-    flatpak_root_prune.stdout != 'Nothing unused to uninstall'
+    flatpak_root_prune.stdout != 'Nothing unused to uninstall' and flatpak_root_prune.stdout != '(skipping)'
   tags:
     - housekeeping
     - flatpak-prune
@@ -105,10 +113,14 @@
 - name: podman safe system prune
   shell:
     cmd: >
-      command -v podman >/dev/null 2>&1 && {{ podman_safe_system_prune_command }}
+      if command -v podman >/dev/null 2>&1; then
+        {{ podman_safe_system_prune_command }}
+      else
+        echo -n '(skipping)'
+      fi
   register: podman_safe_system_user_prune
   changed_when: |
-    podman_safe_system_user_prune.stdout != 'Total reclaimed space: 0B'
+    podman_safe_system_user_prune.stdout != 'Total reclaimed space: 0B' and podman_safe_system_user_prune.stdout != '(skipping)'
   tags:
     - housekeeping
     - podman-prune
@@ -116,10 +128,14 @@
 - name: podman safe system prune (root)
   shell:
     cmd: >
-      command -v podman >/dev/null 2>&1 && {{ podman_safe_system_prune_command }}
+      if command -v podman >/dev/null 2>&1; then
+        {{ podman_safe_system_prune_command }}
+      else
+        echo -n '(skipping)'
+      fi
   register: podman_safe_system_root_prune
   changed_when: |
-    podman_safe_system_root_prune.stdout != 'Total reclaimed space: 0B'
+    podman_safe_system_root_prune.stdout != 'Total reclaimed space: 0B' and podman_safe_system_root_prune.stdout != '(skipping)'
   become: true
   tags:
     - housekeeping
@@ -128,10 +144,14 @@
 - name: docker safe system prune (root)
   shell:
     cmd: >
-      command -v docker >/dev/null 2>&1 && {{ docker_safe_system_prune_command }}
+      if command -v docker >/dev/null 2>&1; then
+        {{ docker_safe_system_prune_command }}
+      else
+        echo -n '(skipping)'
+      fi
   register: docker_safe_system_root_prune
   changed_when: |
-    docker_safe_system_root_prune.stdout != 'Total reclaimed space: 0B'
+    docker_safe_system_root_prune.stdout != 'Total reclaimed space: 0B' and docker_safe_system_root_prune.stdout != '(skipping)'
   become: true
   tags:
     - housekeeping
