@@ -1,15 +1,15 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 # if you run many ansible jobs over time, this directory can get a bit polluted
-- name: clean up all lingering async jobs
-  file:
+- name: Clean up all lingering async jobs
+  ansible.builtin.file:
     path: "{{ ansible_user_dir }}/.ansible_async"
     state: absent
   tags:
     - housekeeping
 
-- name: identify all systemd coredumps
-  find:
+- name: Identify all systemd coredumps
+  ansible.builtin.find:
     paths: /var/lib/systemd/coredump/
     file_type: any
   register: coredump_files
@@ -19,8 +19,8 @@
   tags:
     - housekeeping
 
-- name: delete all systemd coredumps
-  file:
+- name: Delete all systemd coredumps
+  ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
   loop: "{{ coredump_files.files }}"
@@ -30,57 +30,62 @@
   tags:
     - housekeeping
 
-- name: clean up excess system logs
-  shell: journalctl {{ journalctl_cleanup_args }}
+- name: Clean up excess system logs
+  ansible.builtin.shell: "journalctl {{ journalctl_cleanup_args }}"
   become: true
   when:
     - ansible_service_mgr == 'systemd'
   tags:
     - housekeeping
 
-- name: clean up excess user logs
-  shell: journalctl --user {{ journalctl_cleanup_args }}
+- name: Clean up excess user logs
+  ansible.builtin.shell: "journalctl --user {{ journalctl_cleanup_args }}"
   become: false
   when:
     - ansible_service_mgr == 'systemd'
   tags:
     - housekeeping
 
-- name: clean up all uninstalled cached packages
-  shell: pacman -Sc --noconfirm
+- name: Clean up all uninstalled cached packages
+  ansible.builtin.shell: pacman -Sc --noconfirm
   become: true
   when:
     - ansible_pkg_mgr == 'pacman'
   tags:
     - housekeeping
 
-- name: clean up ALL cached packages
-  shell: |
+- name: Clean up ALL cached packages
+  ansible.builtin.shell: |
+    set -o pipefail
     printf "y\ny\n" | pacman -Scc
   become: true
   when:
     - ansible_pkg_mgr == 'pacman'
-    - pacman_clean_all_cached_packages == True
+    - pacman_clean_all_cached_packages
   tags:
     - housekeeping
 
-- name: run user-scoped host-specific housekeeping scripts
-  shell: "{{ housekeeping_user_scope_script }}"
+- name: Run user-scoped host-specific housekeeping scripts
+  ansible.builtin.shell: "{{ housekeeping_user_scope_script }}"
+  register: housekeeping_user_scope_script_result
+  changed_when: housekeeping_user_scope_script_result.stdout != ""
   when:
     - housekeeping_user_scope_script | length > 0
   tags:
     - housekeeping
 
-- name: run root-scoped host-specific housekeeping scripts
-  shell: "{{ housekeeping_root_scope_script }}"
+- name: Run root-scoped host-specific housekeeping scripts
+  ansible.builtin.shell: "{{ housekeeping_root_scope_script }}"
+  register: housekeeping_root_scope_script_result
+  changed_when: housekeeping_root_scope_script_result.stdout != ""
   become: true
   when:
     - housekeeping_root_scope_script | length > 0
   tags:
     - housekeeping
 
-- name: flatpak prune
-  shell:
+- name: Flatpak prune
+  ansible.builtin.shell:
     cmd: >
       if command -v flatpak >/dev/null 2>&1; then
         flatpak --user uninstall --unused --noninteractive
@@ -94,8 +99,8 @@
     - housekeeping
     - flatpak-prune
 
-- name: flatpak prune (system)
-  shell:
+- name: Flatpak prune (system)
+  ansible.builtin.shell:
     cmd: >
       if command -v flatpak >/dev/null 2>&1; then
         flatpak --system uninstall --unused --noninteractive
@@ -110,8 +115,8 @@
     - housekeeping
     - flatpak-prune
 
-- name: podman safe system prune
-  shell:
+- name: Podman safe system prune
+  ansible.builtin.shell:
     cmd: >
       if command -v podman >/dev/null 2>&1; then
         {{ podman_safe_system_prune_command }}
@@ -125,8 +130,8 @@
     - housekeeping
     - podman-prune
 
-- name: podman safe system prune (root)
-  shell:
+- name: Podman safe system prune (root)
+  ansible.builtin.shell:
     cmd: >
       if command -v podman >/dev/null 2>&1; then
         {{ podman_safe_system_prune_command }}
@@ -141,8 +146,8 @@
     - housekeeping
     - podman-prune
 
-- name: docker safe system prune (root)
-  shell:
+- name: Docker safe system prune (root)
+  ansible.builtin.shell:
     cmd: >
       if command -v docker >/dev/null 2>&1; then
         {{ docker_safe_system_prune_command }}
