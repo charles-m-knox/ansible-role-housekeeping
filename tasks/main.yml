@@ -8,11 +8,22 @@
   tags:
     - housekeeping
 
-- name: clean up all systemd coredumps
+- name: identify all systemd coredumps
   find:
     paths: /var/lib/systemd/coredump/
     file_type: any
+  register: coredump_files
+  become: true
+  when:
+    - ansible_service_mgr == 'systemd'
+  tags:
+    - housekeeping
+
+- name: delete all systemd coredumps
+  file:
+    path: "{{ item.path }}"
     state: absent
+  loop: "{{ coredump_files.files }}"
   become: true
   when:
     - ansible_service_mgr == 'systemd'
