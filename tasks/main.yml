@@ -15,7 +15,7 @@
   register: coredump_files
   become: true
   when:
-    - ansible_service_mgr == 'systemd'
+    - ansible_facts["service_mgr"] == 'systemd'
   tags:
     - housekeeping
 
@@ -26,7 +26,7 @@
   loop: "{{ coredump_files.files }}"
   become: true
   when:
-    - ansible_service_mgr == 'systemd'
+    - ansible_facts["service_mgr"] == 'systemd'
   tags:
     - housekeeping
 
@@ -34,7 +34,7 @@
   ansible.builtin.shell: "journalctl {{ journalctl_cleanup_args }}"
   become: true
   when:
-    - ansible_service_mgr == 'systemd'
+    - ansible_facts["service_mgr"] == 'systemd'
   tags:
     - housekeeping
 
@@ -42,7 +42,7 @@
   ansible.builtin.shell: "journalctl --user {{ journalctl_cleanup_args }}"
   become: false
   when:
-    - ansible_service_mgr == 'systemd'
+    - ansible_facts["service_mgr"] == 'systemd'
   tags:
     - housekeeping
 
