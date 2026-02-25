@@ -3,7 +3,7 @@
 # if you run many ansible jobs over time, this directory can get a bit polluted
 - name: Clean up all lingering async jobs
   ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.ansible_async"
+    path: "{{ ansible_facts['user_dir'] }}/.ansible_async"
     state: absent
   tags:
     - housekeeping
