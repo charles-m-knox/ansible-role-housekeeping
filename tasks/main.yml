@@ -50,7 +50,7 @@
   ansible.builtin.shell: pacman -Sc --noconfirm
   become: true
   when:
-    - ansible_pkg_mgr == 'pacman'
+    - ansible_facts["pkg_mgr"] == 'pacman'
   tags:
     - housekeeping
 
@@ -60,7 +60,7 @@
     printf "y\ny\n" | pacman -Scc
   become: true
   when:
-    - ansible_pkg_mgr == 'pacman'
+    - ansible_facts["pkg_mgr"] == 'pacman'
     - pacman_clean_all_cached_packages
   tags:
     - housekeeping
